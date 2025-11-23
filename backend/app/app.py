@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from routes.dashboard import dashboard_route
 from routes.picture import picture_route
+from routes.feedback import feedback_route
 
 
 app = FastAPI()
@@ -21,7 +22,7 @@ async def index():
     return {"message": "Hello, World!"}
 
 
-routes = [picture_route, dashboard_route]
+routes = [picture_route, dashboard_route, feedback_route]
 
 for route in routes:
     app.include_router(prefix="/api", router=route)

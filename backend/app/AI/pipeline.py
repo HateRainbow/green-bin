@@ -1,20 +1,23 @@
-from transformers import pipeline as hf_pipeline
-from typing import Optional, Any
+from pathlib import Path
+from transformers import pipeline
+from typing import Optional, Any, TypeAlias
+
+Pipe: TypeAlias = Any
+
+# Singleton holder for the pipeline instance
+_pipe: Optional[Pipe] = None
 
 
-_pipe: Optional[Any] = None
-
-
-def get_pipe() -> Any:
+def get_pipe() -> Pipe:
     """Return a singleton image-classification pipeline instance.
 
-    The pipeline is created on first call to avoid heavy work at import time.
+    The pipeline loads lazily from the local model directory.
     """
     global _pipe
     if _pipe is None:
-        _pipe = hf_pipeline(
-            "image-classification",
-            model="yangy50/garbage-classification",
-            use_fast=True,
+        model_dir = Path(__file__).resolve().parent / "model"
+        _pipe = pipeline(
+            task="image-classification",
+            model=str(model_dir),
         )
     return _pipe

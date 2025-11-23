@@ -1,13 +1,24 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from app.config import env
-from fastapi_utils.guid_type import setup_guids_postgresql
+from sqlalchemy.orm import sessionmaker, Session
+from config import env
+from typing import Annotated
+from fastapi import Depends
+
 
 engine = create_engine(env.DATABASE_URL, echo=True)
-setup_guids_postgresql(engine)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
+# Setup pgcrypto extension for UUID support (SQLAlchemy 2.0+ compatible)
+# Note: This is deferred - will run when the app starts, not at import time
+def setup_database():
+    """Call this once when your app starts to setup extensions"""
+    with engine.connect() as conn:
+        conn.execute(text('CREATE EXTENSION IF NOT EXISTS "pgcrypto"'))
+        conn.commit()
+
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
@@ -17,3 +28,6 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+DbSession = Annotated[Session, Depends(get_db)]

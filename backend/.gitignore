@@ -5,7 +5,23 @@ build/
 dist/
 wheels/
 *.egg-info
+
+# Datasets and Models (Large files - should not be committed)
 dataset/
+app/AI/model/
+app/AI/models/
+*.pth
+*.pt
+*.h5
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+
+# Hugging Face cache
+.cache/
+transformers_cache/
+
 # Virtual environments
 .venv
 *.env

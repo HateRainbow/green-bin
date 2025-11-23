@@ -1,16 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import api from "@/api";
+import { PictureContext } from "./__root";
 
 export const Route = createFileRoute("/")({
   component: App,
 });
 
 function App() {
+  const navigate = useNavigate();
+  const { setPictureData } = useContext(PictureContext);
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,11 +40,20 @@ function App() {
         filename: string;
         label: string;
         confidence: number;
+        id: string;
       }>("/picture", form);
 
-      console.table(data);
-      setFile(null);
-      setError(null);
+      // Save data to context including the actual File object
+      setPictureData({
+        ...data,
+        imageFile: file, // Save the File object itself
+      });
+
+      // Navigate to detail page
+      navigate({
+        to: "/$id",
+        params: { id: data.id },
+      });
     } catch (err: any) {
       console.error(err);
       if (err?.response?.data?.message) {

@@ -1,6 +1,8 @@
 services:
+  # PostgreSQL Database
   db:
     image: postgres:18
+    container_name: green-bin-db
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -9,6 +11,50 @@ services:
       - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - green-bin-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    container_name: green-bin-backend
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/mydatabase
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - green-bin-network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: green-bin-frontend
+    environment:
+      VITE_API_URL: http://localhost:8080/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - green-bin-network
 
 volumes:
   db_data:
+
+networks:
+  green-bin-network:
+    driver: bridge

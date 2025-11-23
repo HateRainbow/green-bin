@@ -10,6 +10,7 @@ export default function Header() {
           <Link
             to="/"
             className="flex items-center gap-2 text-xl font-bold text-foreground hover:text-primary transition-colors"
+            params={undefined}
           >
             <Leaf className="h-6 w-6 text-primary" />
             <span>GreenBin</span>
@@ -25,6 +26,7 @@ export default function Header() {
                   color: "var(--primary)",
                 },
               }}
+              params={undefined}
             >
               AI scanner
             </Link>
